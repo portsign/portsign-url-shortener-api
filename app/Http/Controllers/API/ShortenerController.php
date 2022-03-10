@@ -76,20 +76,24 @@ class ShortenerController extends BaseController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Shortener $shortener)
+    public function custom_url(Request $request)
     {
         $input = $request->all();
         $validator = Validator::make($input, [
             'short_url' => 'required',
+            'custom_url' => 'required',
         ]);
 
         if($validator->fails()){
             return $this->sendError('Validation Error.', $validator->errors());       
         }
 
-        $product->short_encrypt = $input['short_url'];
-        $product->save();
-        return $this->sendResponse(new ProductResource($product), 'Product updated successfully.');
+        $short_url = $request->short_url;
+        $urlParts = explode('/', str_ireplace(array('http://', 'https://'), '', $short_url));
+        $shortener = Shortener::where('short_encrypt', $urlParts[1]);
+        $short_id = $shortener->get()[0]->id;
+        $updateShortener = $shortener->update(['short_encrypt' => $input['custom_url']]);
+        return $this->sendResponse(new ShortenerResource(Shortener::find($short_id)), 'Short URL updated successfully.');
     }
 
     /**
