@@ -58,13 +58,15 @@ class ShortenerController extends BaseController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Request $request)
     {
-        $shortener = Shortener::find($id);
-        if (is_null($shortener)) {
-            return $this->sendError('URL not found.');
+        $short_url = $request->short_url;
+        $urlParts = explode('/', str_ireplace(array('http://', 'https://'), '', $short_url));
+        $shortener = Shortener::where('short_encrypt', '=', $urlParts[1]);
+        if ($shortener->count() < 1) {
+            return $this->sendError('Short URL not found.');
         }
-        return $this->sendResponse(new ShortenerResource($shortener), 'Short URL retrieved successfully.');
+        return $this->sendResponse(new ShortenerResource($shortener->firstOrFail()), 'Short URL retrieved successfully.');
     }
 
     /**
