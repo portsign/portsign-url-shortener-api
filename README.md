@@ -9,6 +9,10 @@
 
 ## About Portsign Short URL API
 
+requirement :
+php-bcmath
+
+
 ```
 Register URL:
 http://localhost:8000/api/register -> POST
