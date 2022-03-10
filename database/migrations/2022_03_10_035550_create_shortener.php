@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('users_id');
             $table->text('long_url');
             $table->text('short_encrypt');
+            $table->dateTime('deleted_at');
             $table->timestamps();
         });
     }
