@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 use Illuminate\Http\Request;
 use App\Http\Controllers\API\BaseController as BaseController;
 use App\Models\Shortener;
+use DB;
 use Validator;
 use App\Helpers\PseudoCrypt;
 use App\Http\Resources\ShortenerResource;
@@ -17,7 +18,10 @@ class ShortenerController extends BaseController
      */
     public function index()
     {
-        $shortener = Shortener::all();
+        $shortener = Shortener::where([
+            ['deleted_at', NULL],
+            ['users_id', auth()->user()->id]
+        ])->get();
         return $this->sendResponse(ShortenerResource::collection($shortener), 'Short URL retrieved successfully.');
     }
 
@@ -34,7 +38,15 @@ class ShortenerController extends BaseController
         $user = ['users_id' => auth()->user()->id, 'short_encrypt' => $short_encrypt];
         $data = $input + $user;
 
-        $validate = Shortener::where('short_encrypt', '=', $short_encrypt);
+        $validate = Shortener::where('short_encrypt', $short_encrypt);
+        DB::table('shortener')
+            ->where([
+                ['long_url', $input["long_url"]],
+                ['deleted_at', NULL],
+            ])
+            ->orderByRaw('id DESC')
+            ->limit(1)
+            ->update(['deleted_at' => date('Y-m-d H:i:s')]);
 
         if ($validate->count() > 0) {
             return $this->sendError('Url Same');
@@ -49,7 +61,7 @@ class ShortenerController extends BaseController
         }
 
         $shortener = Shortener::create($data);
-        return $this->sendResponse(new ShortenerResource($shortener), 'Short URL created successfully.');
+        return $this->sendResponse(new ShortenerResource(array_merge($shortener->toArray(), ['short_url' => 'https://port.sign/'.$short_encrypt])), 'Short URL created successfully.');
     } 
 
     /**
@@ -102,9 +114,10 @@ class ShortenerController extends BaseController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Shortener $shortener)
+    public function destroy(Request $request)
     {
-        $shortener->delete();
+        $shortener = Shortener::find($request->id);
+        $updateShortener = $shortener->update(['deleted_at' => date('Y-m-d H:i:s')]);
         return $this->sendResponse([], 'Short URL deleted successfully.');
     }
 }

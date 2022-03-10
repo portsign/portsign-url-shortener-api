@@ -14,6 +14,6 @@ class Shortener extends Model
      * @var array
      */
     protected $fillable = [
-        'users_id', 'long_url', 'short_encrypt'
+        'users_id', 'long_url', 'short_encrypt', 'deleted_at'
     ];
 }

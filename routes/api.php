@@ -22,7 +22,9 @@ Route::controller(RegisterController::class)->group(function(){
 });
 
 Route::middleware('auth:sanctum')->group( function () {
+    Route::get('list', [ShortenerController::class, 'index']);
     Route::post('shortener', [ShortenerController::class, 'store']);
     Route::post('get-data', [ShortenerController::class, 'show']);
     Route::post('custom-url', [ShortenerController::class, 'custom_url']);
+    Route::post('destroy', [ShortenerController::class, 'destroy']);
 });
