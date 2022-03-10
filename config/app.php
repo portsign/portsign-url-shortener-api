@@ -191,7 +191,7 @@ return [
     */
 
     'aliases' => Facade::defaultAliases()->merge([
-        // ...
+        'PseudoCrypt' => App\Helpers\PseudoCrypt::class,
     ])->toArray(),
 
 ];

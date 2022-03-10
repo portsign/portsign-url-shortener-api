@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\API\BaseController as BaseController;
 use App\Models\Shortener;
 use Validator;
+use App\Helpers\PseudoCrypt;
 use App\Http\Resources\ShortenerResource;
 
 class ShortenerController extends BaseController
@@ -29,8 +30,10 @@ class ShortenerController extends BaseController
     public function store(Request $request)
     {
         $input = $request->all();
-        $user = ['users_id' => auth()->user()->id];
+        $short_encrypt = PseudoCrypt::hash(rand(1,9999));
+        $user = ['users_id' => auth()->user()->id, 'short_encrypt' => $short_encrypt];
         $data = $input + $user;
+        
         $validator = Validator::make($input, [
             'long_url' => 'required'
         ]);

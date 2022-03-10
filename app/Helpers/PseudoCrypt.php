@@ -1,5 +1,7 @@
 <?php
  
+namespace App\Helpers;
+
 class PseudoCrypt {
     /* Key: Next prime greater than 62 ^ n / 1.618033988749894848 */
     /* Value: modular multiplicative inverse */
