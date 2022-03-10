@@ -102,10 +102,21 @@ class ShortenerController extends BaseController
 
         $short_url = $request->short_url;
         $urlParts = explode('/', str_ireplace(array('http://', 'https://'), '', $short_url));
+        
+        $validation_short_url = Shortener::where('short_encrypt', '=', $request->custom_url);
+        if ($validation_short_url->count() > 0) {
+            return $this->sendError('Short URL Not Available');
+        }
+
         $shortener = Shortener::where('short_encrypt', $urlParts[1]);
-        $short_id = $shortener->get()[0]->id;
-        $updateShortener = $shortener->update(['short_encrypt' => $input['custom_url']]);
-        return $this->sendResponse(new ShortenerResource(Shortener::find($short_id)), 'Short URL updated successfully.');
+        
+        if (isset($shortener->get()[0])) {
+            $short_id = $shortener->get()[0]->id;
+            $updateShortener = $shortener->update(['short_encrypt' => $input['custom_url']]);
+            return $this->sendResponse(new ShortenerResource(Shortener::find($short_id)), 'Short URL updated successfully.');
+        } else {
+            return $this->sendError('Error.');
+        }
     }
 
     /**
