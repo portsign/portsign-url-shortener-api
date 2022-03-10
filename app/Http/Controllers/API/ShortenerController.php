@@ -33,13 +33,19 @@ class ShortenerController extends BaseController
         $short_encrypt = PseudoCrypt::hash(rand(1,9999));
         $user = ['users_id' => auth()->user()->id, 'short_encrypt' => $short_encrypt];
         $data = $input + $user;
-        
+
+        $validate = Shortener::where('short_encrypt', '=', $short_encrypt);
+
+        if ($validate->count() > 0) {
+            return $this->sendError('Url Same');
+        }
+
         $validator = Validator::make($input, [
             'long_url' => 'required'
         ]);
 
         if($validator->fails()){
-            return $this->sendError('Validation Error.', $validator->errors());       
+            return $this->sendError('Validation Error.', $validator->errors());
         }
 
         $shortener = Shortener::create($data);
